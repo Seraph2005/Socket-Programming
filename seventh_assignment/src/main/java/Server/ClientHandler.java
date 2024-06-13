@@ -40,7 +40,53 @@ public class ClientHandler implements Runnable {
                     sendToAll(user.getUsername() + " left the chat.");
                 }
                 else if(request.equals("2")) {
-                    
+                    out.writeUTF("Download");
+                    out.flush();
+                    File[] files = new File("data").listFiles();
+                    if (files == null) {
+                        System.out.println("no files found");
+                        return;
+                    }
+                    try {
+                        out.writeInt(files.length);
+                    } catch (IOException e) {
+                        closeAll();
+                    }
+                    int i = 1;
+                    for (File file : files) {
+                        try {
+                            out.writeUTF(i + "- " + file.getName());
+                            out.flush();
+                            i++;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    int index;
+                    try {
+                        index = in.readInt();
+                        System.out.println("File no." + index + " downloading.");
+
+                        int bytes;
+                        File file = files[index - 1];
+                        FileInputStream fileInputStream = new FileInputStream(file);
+
+                        out.writeUTF(file.getName());
+                        out.writeInt((int) file.length());
+                        out.flush();
+
+                        byte[] buffer = new byte[4 * 1024];
+                        while ((bytes = fileInputStream.read(buffer)) != -1) {
+                            out.write(buffer, 0, bytes);
+                            out.flush();
+                        }
+                        fileInputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        closeAll();
+                        break;
+                    }
                 }
             }
         } catch (IOException e) {
@@ -65,4 +111,22 @@ public class ClientHandler implements Runnable {
             out.flush();
         }
     }
+
+    public void closeAll() {
+        try {
+            if (in != null) {
+                in.close();
+            }
+            if (out != null) {
+                out.close();
+            }
+            if (user.getSocket() != null) {
+                user.getSocket().close();
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+
 }

@@ -4,6 +4,8 @@ import java.util.Scanner;
 import java.io.*;
 import java.net.Socket;
 
+import static java.lang.Thread.sleep;
+
 // Client Class
 public class Client {
     private static final String SERVER_IP = "localhost";
@@ -12,7 +14,7 @@ public class Client {
     static Scanner input = new Scanner(System.in);
     static Scanner input1 = new Scanner(System.in);
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         Socket user = new Socket(SERVER_IP, SERVER_PORT);
         DataOutputStream out = new DataOutputStream(user.getOutputStream());
         DataInputStream reader = new DataInputStream(System.in);
@@ -32,14 +34,12 @@ public class Client {
             String task = input1.nextLine();
             out.writeUTF(task);
             out.flush();
-
-            if(task.equals("1")){
-                String userInput = "";
-                while (!(userInput.equals("quit"))) {
-                    userInput = reader.readLine();
-                    out.writeUTF(userInput);
-                    out.flush();
-                }
+            if(task.equals("2"))
+            {
+                int fChoice = input.nextInt();
+                out.writeInt(fChoice);
+                out.flush();
+                sleep(100);
             }
         }
 
